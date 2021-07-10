@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HidSharp;
 using OpenTabletDriver.Plugin.Devices;
+using HidSharp.Reports;
 
 namespace OpenTabletDriver.Devices
 {
@@ -12,6 +13,26 @@ namespace OpenTabletDriver.Devices
         {
             foreach (var hidDevice in DeviceList.Local.GetHidDevices())
             {
+                var reportDescriptor = hidDevice.GetReportDescriptor();
+                foreach (var deviceItem in reportDescriptor.DeviceItems)
+                {
+                    foreach (var usage in deviceItem.Usages.GetAllValues())
+                    {
+                        Console.WriteLine(string.Format("Usage: {0:X4} {1}", usage, (Usage)usage));
+                    }
+                    foreach (var report in deviceItem.Reports)
+                    {
+                        Console.WriteLine(string.Format("{0}: ReportID={1}, Length={2}, Items={3}",
+                                            report.ReportType, report.ReportID, report.Length, report.DataItems.Count));
+                        foreach (var dataItem in report.DataItems)
+                        {
+                            Console.WriteLine(string.Format("  {0} Elements x {1} Bits, Units: {2}, Expected Usage Type: {3}, Flags: {4}, Usages: {5}",
+                                dataItem.ElementCount, dataItem.ElementBits, dataItem.Unit.System, dataItem.ExpectedUsageType, dataItem.Flags,
+                                string.Join(", ", dataItem.Usages.GetAllValues().Select(usage => usage.ToString("X4") + " " + ((Usage)usage).ToString()))));
+                        }
+                    }
+                }
+
                 Console.WriteLine("-----------------------------------------------------------------------");
                 Console.WriteLine(BitConverter.ToString(hidDevice.GetRawReportDescriptor()).Replace("-", " "));
             }
