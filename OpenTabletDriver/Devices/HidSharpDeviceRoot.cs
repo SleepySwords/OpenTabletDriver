@@ -10,6 +10,11 @@ namespace OpenTabletDriver.Devices
     {
         private HidSharpDeviceRootHub()
         {
+            foreach (var hidDevice in DeviceList.Local.GetHidDevices())
+            {
+                Console.WriteLine("-----------------------------------------------------------------------");
+                Console.WriteLine(BitConverter.ToString(hidDevice.GetRawReportDescriptor()).Replace("-", " "));
+            }
             DeviceList.Local.Changed += (sender, e) =>
             {
                 var newList = DeviceList.Local.GetHidDevices().Select(d => new HidSharpEndpoint(d));
